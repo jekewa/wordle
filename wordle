@@ -1,0 +1,75 @@
+#!/bin/bash
+
+MISPLACED=()
+
+while getopts "a:,e:,i:,h,m:" opt; do
+  case $opt in
+    a)
+      ANY="${ANY}${OPTARG}"
+      ;;
+    e)
+      EXACT="^$OPTARG"
+      ;;
+    i)
+      IGNORE="${IGNORE}${OPTARG}"
+      ;;
+    m)
+      MISPLACED+=("$OPTARG")
+      ;;
+    h)
+      HELP=help
+      ;;
+  esac
+done
+
+if [ "$IGNORE" ]; then
+  IGNORE="[$IGNORE]"
+fi
+if [ "$MISPLACED" ]; then
+  MISPLACED="${MISPLACED[@]}"
+  MISPLACED="((${MISPLACED// /)|(}))"
+fi
+if [ "$ANY" ]; then
+  ANY=".*$(echo $ANY | awk '{gsub(/.{1}/,"(?=.*&)")}1').*"
+fi
+
+if [ "$HELP" ] || [ -z "${ANY}${EXACT}${IGNORE}${MISPLACED}" ]; then
+  echo "Usage: $0 -a (ANY) -e (EXACT) -i IGNORE -m MISPLACED -h"
+  echo " -a ANY:        Characters found in wrong position (yellow in Wordle), ensuring they are in the solutions"
+  echo " -e EXACT:      Characters found in correct position, using periods for yet unknowns (green in Wordle), ensuring solution matches"
+  echo "                  Format such as '..e..' when only E is known to be in the center"
+  echo " -i IGNORE:     Charcters found not in word (grey in Wordle), keeping them out of the solutions"
+  echo " -m MISPLACED:  Characters found in wrong  position, but using periods for other characters (yellow in Wordle), filtering them from solutions"
+  echo "                  Format such as '..e..' when E is known to be not in the center"
+  echo
+  echo "Example: $0 -a abc -e ....e -i fgh"
+  echo "  This will search for words ending in 'e' that contain 'a' and 'b' and 'c' that don't have 'f' or 'g' or 'h'"
+  exit
+fi
+
+while read solution; do
+
+  if [ "$EXACT" ] && ! [[ $solution =~ $EXACT ]]; then
+#echo "$solution caught by $EXACT"
+    continue
+  fi
+
+  if [ "$IGNORE" ] && [[ $solution =~ $IGNORE ]]; then
+#echo "$solution caught by $IGNORE"
+    continue
+  fi
+
+  if [ "$MISPLACED" ] && [[ $solution =~ $MISPLACED ]]; then
+#echo "$solution caught by $MISPLACED"
+    continue
+  fi
+
+  # Do the "expensive" one last
+  if [ "$ANY" ] && [[ "$(which ggrep)" ]] && ! [[ "$(ggrep -P $ANY <<< $solution)" ]]; then
+#echo "$solution caught by  $ANY"
+    continue
+  fi
+
+  echo $solution
+done < `dirname $0`/solutions.txt
+
