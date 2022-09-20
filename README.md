@@ -123,7 +123,7 @@ small
 flask
 ```
 
-Optionally, we can add the paramet erot filter the misplaced letters.
+Optionally, we can add the parameter to filter the misplaced letters.
 This will remove words with those letters in the wrong spot.
 Because of the way the regular expressions work, we want to call out each separately.
 
@@ -161,6 +161,7 @@ We can modify our command to filter more, by either augmenting the parameters in
 `./wordle -i et -a las -e ..a.. -m l.... -m ...s. -i h -m ...l. -m ....l -e s.a..`
 
 Note the added -i for the ignored H, and the added -m for the filtering positions of the known bad Ls.
+The -m for the Ls is repeated, or the list would only filter words with double-L at the end, and not PSALM or SNAIL in the example.
 This should remove the word SHALL for certain, as well as any other words containing an H or with L in one of those other positions.
 
 Also, adding the -e at the end will override the previous -e.
