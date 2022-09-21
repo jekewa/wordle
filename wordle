@@ -30,7 +30,8 @@ if [ "$MISPLACED" ]; then
   MISPLACED="((${MISPLACED// /)|(}))"
 fi
 if [ "$ANY" ]; then
-  ANY=".*$(echo $ANY | awk '{gsub(/.{1}/,"(?=.*&)")}1').*"
+  ANY="$(echo $ANY | grep -o . | sort | tr '\n' ' ')"
+  ANY=".*${ANY// /.*}"
 fi
 
 if [ "$HELP" ] || [ -z "${ANY}${EXACT}${IGNORE}${MISPLACED}" ]; then
@@ -64,10 +65,12 @@ while read solution; do
     continue
   fi
 
-  # Do the "expensive" one last
-  if [ "$ANY" ] && [[ "$(which ggrep)" ]] && ! [[ "$(ggrep -P $ANY <<< $solution)" ]]; then
-#echo "$solution caught by  $ANY"
-    continue
+  if [ "$ANY" ]; then
+    SORTED="$(echo $solution | grep -o . | sort | tr -d '\n')"
+    if ! [[ $SORTED =~ $ANY ]]; then
+#echo "$solution caught by $ANY"
+      continue
+    fi
   fi
 
   echo $solution

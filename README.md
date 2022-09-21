@@ -209,19 +209,13 @@ First it parses the parameters and builds the potentially growing lists.
 
 If the -h parameter is found, the help is displayed and nothing more will happen.
 
-For the -i and -e paramters, it's simple regular expression matching to ensure that the string either matches or doesn't contain the values, as appropriate.
+For the -i and -e paramters, simple regular expression matching ensures that the string either matches or doesn't contain the values, as appropriate.
 
 The -m parameters combine in a big "or" regular expression to make sure those matching solutions are eliminated.
+Careful separation of the letters into separate -m uses will have more success than combining them, although clever regex authors could find success.
+Using `-m ...ll` will eliminate only words ending in LL, while `-m ...l. -m ....l` will eliminate words where either of the last two characters are L.
 
-The -a parameters are combined into a little bit of a harder "or" that uses lookaheads to ensure that all of those letters are included anywhere in the possible solutions.
+The -a parameters are combined to make sure all of the provided letters are in the found solutions.
 
 The script brute forces through each of the possible solutions and compares against the regular expressions
 
-### ggrep
-
-Note that I wrote this on my Mac, and the MacOS grep command doesn't support lookaheads, so I had to use the ggrep version (which I added through Homebrew). 
-As such, the -a parameter won't work with the script as written not on a Mac, or on a Mac without ggrep added.
-The script should see if ggrep doesn't exist and skip that bit safely.
-This will result in a few extra hints that might not contain all of the yellow letters that aren't in an exact match.
-
-I might change this to be a little more savvy in the future, but for now, it suits my needs and can still function as an example for anyone else.
