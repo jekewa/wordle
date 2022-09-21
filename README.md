@@ -47,10 +47,11 @@ Wordle doesn't allow use all of the 5-letter English words, like if you compared
 This solution file is at least obscured a little, where the words aren't listed in game-play order.
 The JavaScript does reveal the date-based math to find the index of today's word, which is how that other script works.
 
-# Wordle Help
+# Wordle Script
 
-This repo contains a simple bash script and a file with all the solutions taken from the Worlde JavaScript.
+This repo contains a simple bash script and a file with all the solutions taken from the Wordle JavaScript.
 The bash script allows following along with Wordle game play to share a list of words from the solution that match what is learned after each guess.
+THe script will not do any analysis on the choices, leaving that bit of fun yet in the game play.
 
 This is intended to help guide through the subset of offerings, more than really steer to a best-choice solution.
 It does give an edge because it will eliminiate unacceptable solutions.
@@ -123,7 +124,11 @@ small
 flask
 ```
 
-Optionally, we can add the parameter to filter the misplaced letters.
+As we can see, none of the words contain the letter E or T.
+All of the words contain the letters L, A, and S.
+Every word has an A in the center.
+
+In addition to that simple filtering, we can add the parameter to filter the misplaced letters.
 This will remove words with those letters in the wrong spot.
 Because of the way the regular expressions work, we want to call out each separately.
 
@@ -150,7 +155,7 @@ Note the first list didn't have any words that started with an L, so there isn't
 We might not know that, though, if we hadn't done the first call.
 Clearly, the second list removed any words where S was next-to-last, such as SLASH and CLASP.
 
-Imagine next we try the word SHALL, just because it's first, not because it's a better choice than others.
+Imagine next we try the word SHALL, for the example because it's first not because it's a better choice than others.
 We learn that the S is in the right place, as it turns green. 
 We learn that H is not included, so it turns grey.
 The letter A is still in the right spot, so it stays green.
@@ -161,8 +166,7 @@ We can modify our command to filter more, by either augmenting the parameters in
 `./wordle -i et -a las -e ..a.. -m l.... -m ...s. -i h -m ...l. -m ....l -e s.a..`
 
 Note the added -i for the ignored H, and the added -m for the filtering positions of the known bad Ls.
-The -m for the Ls is repeated, or the list would only filter words with double-L at the end, and not PSALM or SNAIL in the example.
-This should remove the word SHALL for certain, as well as any other words containing an H or with L in one of those other positions.
+The -m for the Ls is repeated, as using ...ll would only filter words with double-L at the end, like SHALL, but not PSALM or SNAIL in the example.
 
 Also, adding the -e at the end will override the previous -e.
 This is done so this simple "up arrow and edit" can make for a progressive filtering.
@@ -176,7 +180,7 @@ Alternatively, we can rewrite the parameter lists, with or without the known mis
 
 Without the misplaced parameters, we'd be left to self-filter the list as we looked at the game board to see which letters we shouldn't include.
 Including the misplaced parameters does that filter on the list for us.
-The result of this new parameter list  brings us to three possibilities!
+The result of this new parameter list brings us to three possibilities!
 
 ```
 slack
@@ -190,19 +194,25 @@ We might  choose any of the words, and add another layer of parameters to our fi
 This gives us only one other positioned piece, the SLA start of the word.
 Reasonably, choosing SLANG or SLAIN would allow us to leverage the N to know if it was the right or other word, or neither, so those could be smart choices.
 If we did chose SLANG or SLAIN, we'd see that only SLACK remains, so the worst case for this example is a 4-turn guess.
+If we chose SLACK, we could be left with the other two and no extra hints to which would be better, but in this case, we'd win in three turns.
 
 That's where the game has its charm.
 
 Not all games pare down this quickly or so close to guarantee a solution in six turns.
+But it does help remove some of the mystery of which words could be the solution.
 
 ## The Innards
 
 The script itself is pretty simple.
 
-It parses the parameters and builds the potentially growing lists.
+First it parses the parameters and builds the potentially growing lists.
+
+If the -h parameter is found, the help is displayed and nothing more will happen.
 
 For the -i and -e paramters, it's simple regular expression matching to ensure that the string either matches or doesn't contain the values, as appropriate.
-The -m parameters combine in a big "or" regular expression to make sure those matches are eliminated.
+
+The -m parameters combine in a big "or" regular expression to make sure those matching solutions are eliminated.
+
 The -a parameters are combined into a little bit of a harder "or" that uses lookaheads to ensure that all of those letters are included anywhere in the possible solutions.
 
 The script brute forces through each of the possible solutions and compares against the regular expressions
@@ -211,6 +221,7 @@ The script brute forces through each of the possible solutions and compares agai
 
 Note that I wrote this on my Mac, and the MacOS grep command doesn't support lookaheads, so I had to use the ggrep version (which I added through Homebrew). 
 As such, the -a parameter won't work with the script as written not on a Mac, or on a Mac without ggrep added.
+The script should see if ggrep doesn't exist and skip that bit safely.
+This will result in a few extra hints that might not contain all of the yellow letters that aren't in an exact match.
 
 I might change this to be a little more savvy in the future, but for now, it suits my needs and can still function as an example for anyone else.
-
