@@ -48,7 +48,7 @@ if [ "$HELP" ] || [ -z "${ANY}${EXACT}${IGNORE}${MISPLACED}" ]; then
   exit
 fi
 
-while read solution; do
+sort -R `dirname $0`/solutions.txt | while read solution; do
 
   if [ "$EXACT" ] && ! [[ $solution =~ $EXACT ]]; then
 #echo "$solution caught by $EXACT"
@@ -74,5 +74,5 @@ while read solution; do
   fi
 
   echo $solution
-done < `dirname $0`/solutions.txt
+done 
 
